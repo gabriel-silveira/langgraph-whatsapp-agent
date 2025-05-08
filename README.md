@@ -1,5 +1,20 @@
 # LangGraph WhatsApp Agent
 
+Para executar a aplicação:
+```bash
+# crie o virtual environment
+python -m venv venv
+
+# ative o virtual environment
+source venv/bin/activate
+
+# com o uv instalado
+uv pip install -r pyproject.toml
+
+# execute
+PYTHONPATH=src python main.py
+```
+
 A template for building WhatsApp agents using LangGraph and Twilio. This project enables you to deploy AI agents that interact with users via WhatsApp, process messages and images, and invoke custom graph-based agents hosted on the LangGraph Platform.
 
 It provides a foundation for building scalable, secure, and maintainable AI agent services.
