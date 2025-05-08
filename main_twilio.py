@@ -1,4 +1,4 @@
-from langgraph_whatsapp.server import APP
+from langgraph_whatsapp.server_twilio import APP
 
 if __name__ == "__main__":
     import uvicorn

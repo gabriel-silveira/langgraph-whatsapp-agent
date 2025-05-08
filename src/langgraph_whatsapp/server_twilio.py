@@ -7,7 +7,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import Message
 from twilio.request_validator import RequestValidator
 
-from src.langgraph_whatsapp.channel import WhatsAppAgentTwilio
+from src.langgraph_whatsapp.channel_twilio import WhatsAppAgentTwilio
 from src.langgraph_whatsapp.config import TWILIO_AUTH_TOKEN
 
 LOGGER = logging.getLogger("server")
