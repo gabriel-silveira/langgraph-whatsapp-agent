@@ -1,15 +1,17 @@
 import logging
-from typing import Union
-from fastapi import FastAPI, Request, HTTPException, Response
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from src.langgraph_whatsapp.channel_whatsapp import WhatsAppBusinessAgent
 from src.langgraph_whatsapp.config import WHATSAPP_VERIFY_TOKEN
 
 LOGGER = logging.getLogger("whatsapp")
-APP = FastAPI()
+
 WSP_AGENT = WhatsAppBusinessAgent()
 
-@APP.get("/webhook", response_model=None)
+app = FastAPI()
+
+
+@app.get("/webhook", response_model=None)
 async def verify_webhook(request: Request) -> JSONResponse:
     """Handle webhook verification from WhatsApp Cloud API
     
@@ -18,10 +20,13 @@ async def verify_webhook(request: Request) -> JSONResponse:
     
     See: https://developers.facebook.com/docs/graph-api/webhooks/getting-started
     """
+
     params = request.query_params
     mode = params.get("hub.mode")
     token = params.get("hub.verify_token")
     challenge = params.get("hub.challenge")
+
+    print("Challenge received: ", challenge)
 
     if not all([mode, token, challenge]):
         return JSONResponse(
@@ -29,24 +34,35 @@ async def verify_webhook(request: Request) -> JSONResponse:
             content={"error": "Missing required parameters"}
         )
 
-    if mode == "subscribe" and token == WHATSAPP_VERIFY_TOKEN:
-        try:
+    try:
+        if mode != "subscribe":
             return JSONResponse(
-                status_code=200,
-                content=int(challenge)
+                status_code=403,
+                content={"error": f"Invalid mode: {mode}"}
             )
-        except ValueError:
+            
+        LOGGER.info(f"Token received: {token}")
+        LOGGER.info(f"Token expected: {WHATSAPP_VERIFY_TOKEN}")
+        
+        if token != WHATSAPP_VERIFY_TOKEN:
             return JSONResponse(
-                status_code=400,
-                content={"error": "Invalid challenge value"}
+                status_code=403,
+                content={"error": f"Invalid verify token: {token}"}
             )
+        
+        return JSONResponse(
+            status_code=200,
+            content=challenge
+        )
+    except ValueError as e:
+        LOGGER.error(f"Error processing webhook verification: {str(e)}")
+        return JSONResponse(
+            status_code=400,
+            content={"error": f"Invalid challenge value: {challenge}"}
+        )
 
-    return JSONResponse(
-        status_code=403,
-        content={"error": "Invalid verify token"}
-    )
 
-@APP.post("/webhook")
+@app.post("/webhook")
 async def whatsapp_webhook(request: Request) -> JSONResponse:
     """Handle incoming messages and status updates from WhatsApp Cloud API
     
@@ -58,6 +74,7 @@ async def whatsapp_webhook(request: Request) -> JSONResponse:
     
     See: https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks/components
     """
+
     try:
         # Process the webhook and get response data
         response_data = await WSP_AGENT.handle_message(request)
@@ -82,23 +99,13 @@ async def whatsapp_webhook(request: Request) -> JSONResponse:
             content={"error": "Internal server error"}
         )
 
+
 # Health check endpoint
-@APP.get("/health")
+@app.get("/health")
 async def health_check() -> JSONResponse:
     """Simple health check endpoint"""
+
     return JSONResponse(
         content={"status": "healthy"},
         status_code=200
-    )
-
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(
-        APP,
-        host="0.0.0.0",
-        port=8082,
-        log_level="info",
-        ssl_keyfile="key.pem",  # SSL é obrigatório para webhooks do WhatsApp
-        ssl_certfile="cert.pem"
     )

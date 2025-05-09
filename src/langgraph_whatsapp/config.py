@@ -1,14 +1,17 @@
-from os import environ
 import logging
 import os
+from dotenv import load_dotenv
+
+# Carrega variáveis do .env
+load_dotenv()
 
 LOGGER = logging.getLogger(__name__)
 
-LANGGRAPH_URL = environ.get("LANGGRAPH_URL")
-ASSISTANT_ID = environ.get("LANGGRAPH_ASSISTANT_ID", "agent")
-CONFIG = environ.get("CONFIG") or "{}"
-TWILIO_AUTH_TOKEN = environ.get("TWILIO_AUTH_TOKEN")
-TWILIO_ACCOUNT_SID = environ.get("TWILIO_ACCOUNT_SID")
+LANGGRAPH_URL = os.getenv("LANGGRAPH_URL")
+ASSISTANT_ID = os.getenv("LANGGRAPH_ASSISTANT_ID", "agent")
+CONFIG = os.getenv("CONFIG") or "{}"
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
 
 # WhatsApp Business Cloud API Configuration
 WHATSAPP_API_TOKEN = os.getenv("WHATSAPP_API_TOKEN", "")
