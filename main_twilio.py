@@ -10,6 +10,16 @@ if src_path not in sys.path:
 import logging
 from urllib.parse import parse_qs
 
+# Configuração do logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),  # Envia para stdout/stderr
+        logging.FileHandler('/var/log/gunicorn/app.log')  # Logs específicos da aplicação
+    ]
+)
+
 from fastapi import FastAPI, Request, Response, HTTPException
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
