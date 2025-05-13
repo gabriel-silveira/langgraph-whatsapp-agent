@@ -20,6 +20,27 @@ python main_whatsapp.py
 # using gunicorn is recommended for production
 ```
 
+## Deploy
+Para fazer o deploy da aplicação, é recomendado usar o LangGraph Platform, porém utilizei um servidor EC2 para fazer o deploy.
+
+Foi utilizado o Nginx com proxy reverso para servir a aplicação.
+
+Para inicializar foi utilizado o gunicorn.
+
+```bash
+# para iniciar
+sudo systemctl start gunicorn
+
+# caso haja alterações no código ou no arquivo de configuração do gunicorn
+sudo systemctl restart gunicorn
+
+# para parar
+sudo systemctl stop gunicorn
+
+# para alterar o arquivo de configuração do gunicorn
+sudo nano /etc/systemd/system/gunicorn.service
+```
+
 A template for building WhatsApp agents using LangGraph and Twilio. This project enables you to deploy AI agents that interact with users via WhatsApp, process messages and images, and invoke custom graph-based agents hosted on the LangGraph Platform.
 
 It provides a foundation for building scalable, secure, and maintainable AI agent services.
