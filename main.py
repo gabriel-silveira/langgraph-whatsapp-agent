@@ -35,9 +35,11 @@ async def verify_webhook(request: Request) -> JSONResponse:
     token = params.get("hub.verify_token")
     challenge = params.get("hub.challenge")
 
-    print("Challenge received: ", challenge)
+    challenge_int = int(challenge) if challenge else None
 
-    if not all([mode, token, challenge]):
+    print("Challenge (int) received: ", challenge_int)
+
+    if not all([mode, token, challenge_int]):
         return JSONResponse(
             status_code=400,
             content={"error": "Missing required parameters"}
@@ -61,7 +63,7 @@ async def verify_webhook(request: Request) -> JSONResponse:
         
         return JSONResponse(
             status_code=200,
-            content=challenge
+            content=challenge_int
         )
     except ValueError as e:
         LOGGER.error(f"Error processing webhook verification: {str(e)}")
