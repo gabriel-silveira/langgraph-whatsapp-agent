@@ -41,7 +41,9 @@ class WhatsAppAgentTwilio(WhatsAppAgent):
     def __init__(self) -> None:
         if not (TWILIO_AUTH_TOKEN and TWILIO_ACCOUNT_SID):
             raise ValueError("Twilio credentials are not configured")
-        self.agent = Agent()
+        # TODO: Uncomment when LangGraph server is ready
+        # self.agent = Agent()
+        pass
 
     async def handle_message(self, request: Request) -> str:
         form = await request.form()
@@ -65,18 +67,22 @@ class WhatsAppAgentTwilio(WhatsAppAgent):
                 except Exception as err:
                     LOGGER.error("Failed to download %s: %s", url, err)
 
-        # Assemble payload for the LangGraph agent
-        input_data = {
-            "id": sender,
-            "user_message": content,
-        }
-        if images:
-            # Pass all images to the agent
-            input_data["images"] = [
-                {"image_url": {"url": img["data_uri"]}} for img in images
-            ]
+        # TODO: Uncomment when LangGraph server is ready
+        # # Assemble payload for the LangGraph agent
+        # input_data = {
+        #     "id": sender,
+        #     "user_message": content,
+        # }
+        # if images:
+        #     # Pass all images to the agent
+        #     input_data["images"] = [
+        #         {"image_url": {"url": img["data_uri"]}} for img in images
+        #     ]
+        # 
+        # reply = await self.agent.invoke(**input_data)
 
-        reply = await self.agent.invoke(**input_data)
+        # Temporary response without LangGraph
+        reply = f"Received your message: {content}\nLangGraph integration coming soon!"
 
         twiml = MessagingResponse()
         twiml.message(reply)
