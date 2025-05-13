@@ -12,10 +12,12 @@ source venv/bin/activate
 uv pip install -r pyproject.toml
 
 # execute with Twilio
-PYTHONPATH=src python main_twilio.py
+python main_twilio.py
 
 # or execute with WhatsApp Business
-PYTHONPATH=src python main_whatsapp.py
+python main_whatsapp.py
+
+# using gunicorn is recommended for production
 ```
 
 A template for building WhatsApp agents using LangGraph and Twilio. This project enables you to deploy AI agents that interact with users via WhatsApp, process messages and images, and invoke custom graph-based agents hosted on the LangGraph Platform.
