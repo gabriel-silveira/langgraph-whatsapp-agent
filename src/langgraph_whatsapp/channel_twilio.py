@@ -50,16 +50,26 @@ class WhatsAppAgentTwilio(WhatsAppAgent):
 
         sender  = form.get("From", "").strip()
         content = form.get("Body", "").strip()
+
         if not sender:
             raise HTTPException(400, detail="Missing 'From' in request form")
 
+        LOGGER.info(f"\nReceived message from {sender}")
+        LOGGER.info(f'Body: "{content}"')
+
         # Collect ALL images (you'll forward only the first one for now)
         images = []
+
         for i in range(int(form.get("NumMedia", "0"))):
-            url   = form.get(f"MediaUrl{i}", "")
             ctype = form.get(f"MediaContentType{i}", "")
+            url   = form.get(f"MediaUrl{i}", "")
+
             if url and ctype.startswith("image/"):
                 try:
+                    LOGGER.info(f"\nDownloading image #{i}")
+                    LOGGER.info(f'Url: "{url}"')
+                    LOGGER.info(f'Content type: "{ctype}"')
+
                     images.append({
                         "url": url,
                         "data_uri": twilio_url_to_data_uri(url, ctype),
@@ -84,6 +94,15 @@ class WhatsAppAgentTwilio(WhatsAppAgent):
         # Temporary response without LangGraph
         reply = f"Received your message: {content}\nLangGraph integration coming soon!"
 
+        LOGGER.info(f"\nReplying to {sender}")
+        LOGGER.info(f'Body: "{reply}"')
+
         twiml = MessagingResponse()
         twiml.message(reply)
+
+        LOGGER.info(f"\nOriginal form data:")
+        LOGGER.info(form)
+
+        LOGGER.info("\n- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n")
+
         return str(twiml)
