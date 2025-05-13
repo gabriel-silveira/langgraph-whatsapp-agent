@@ -54,8 +54,7 @@ class WhatsAppAgentTwilio(WhatsAppAgent):
         if not sender:
             raise HTTPException(400, detail="Missing 'From' in request form")
 
-        LOGGER.info(f"\nReceived message from {sender}")
-        LOGGER.info(f'Body: "{content}"')
+        LOGGER.info(f"\nReceived message:\nFrom {sender}\nBody: {content}\n")
 
         # Collect ALL images (you'll forward only the first one for now)
         images = []

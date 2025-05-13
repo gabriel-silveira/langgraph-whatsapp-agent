@@ -54,7 +54,8 @@ class TwilioMiddleware(BaseHTTPMiddleware):
             url   = f"{proto}://{host}{request.url.path}"
             sig   = request.headers.get("X-Twilio-Signature", "")
 
-            LOGGER.info(f"Validating Twilio request:\nURL: {url}\nSignature: {sig}\nForm data: {flat_form_dict}")
+            LOGGER.info(f"Validating Twilio request:\nURL: {url}\nSignature: {sig}\nForm data: {flat_form_dict}\n")
+
             if not self.validator.validate(url, flat_form_dict, sig):
                 LOGGER.warning(f"Invalid Twilio signature:\nURL: {url}\nSignature: {sig}\nForm data: {flat_form_dict}")
                 return Response(status_code=401, content="Invalid Twilio signature")
