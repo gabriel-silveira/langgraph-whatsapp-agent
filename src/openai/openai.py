@@ -2,41 +2,53 @@ import requests
 from openai import OpenAI
 
 from langgraph_whatsapp.config import OPENAI_API_KEY, TRANSCRIBE_MODEL, NLP_MODEL, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN
+import logging
+
+LOGGER = logging.getLogger("whatsapp")
 
 llm = OpenAI(api_key=OPENAI_API_KEY)
 
 
-def transcribe_audio(audio_source: str, is_url: bool = False) -> str:
+def transcribe_audio(audio_source: str, is_url: bool = False, retries: int = 3) -> str:
     """
     Transcreve áudio para texto usando o OpenAI.
     """
-    if is_url:
+    for i in range(retries):
         try:
-            response = requests.get(
-              audio_source,
-              stream=True,
-              auth=(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN),
+            if is_url:
+                try:
+                    response = requests.get(
+                        audio_source,
+                        stream=True,
+                        auth=(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN),
+                    )
+
+                    response.raise_for_status()
+
+                    audio_bytes = response.content
+                except requests.exceptions.RequestException as e:
+                    raise ValueError(f"Failed to request audio URL: {e}")
+            else:
+                try:
+                    with open(audio_source, "rb") as f:
+                        audio_bytes = f.read()
+                except FileNotFoundError:
+                    raise ValueError(f"Audio file not found: {audio_source}")
+
+            transcription = llm.audio.transcriptions.create(
+                model=TRANSCRIBE_MODEL,
+                file=audio_bytes,
+                response_format="text"
             )
 
-            response.raise_for_status()
+            return transcription.text.strip()
 
-            audio_bytes = response.content
-        except requests.exceptions.RequestException as e:
-            raise ValueError(f"Failed to request audio URL: {e}")
-    else:
-        try:
-            with open(audio_source, "rb") as f:
-                audio_bytes = f.read()
-        except FileNotFoundError:
-            raise ValueError(f"Audio file not found: {audio_source}")
+        except openai.RateLimitError:
+            wait = 2 ** i
+            LOGGER.warning(f"Rate limit exceeded. Retrying in {wait} seconds...")
+            time.sleep(wait)
 
-    transcription = llm.audio.transcriptions.create(
-        model=TRANSCRIBE_MODEL,
-        file=audio_bytes,
-        response_format="text"
-    )
-
-    return transcription.text.strip()
+    raise Exception("Failed to transcribe audio after multiple attempts due to rate limit.")
 
 
 def generate_response(transcribed_text: str, user_context: str = None) -> str:
