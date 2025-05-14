@@ -7,6 +7,10 @@ load_dotenv()
 
 LOGGER = logging.getLogger(__name__)
 
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+TRANSCRIBE_MODEL = "gpt-4o-mini-transcribe"
+NLP_MODEL = "gpt-4o-mini"
+
 LANGGRAPH_URL = os.getenv("LANGGRAPH_URL")
 ASSISTANT_ID = os.getenv("LANGGRAPH_ASSISTANT_ID", "agent")
 CONFIG = os.getenv("CONFIG") or "{}"
