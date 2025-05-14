@@ -1,0 +1,61 @@
+import requests
+from openai import OpenAI
+
+from langgraph_whatsapp.config import OPENAI_API_KEY, TRANSCRIBE_MODEL, NLP_MODEL, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN
+
+llm = OpenAI(api_key=OPENAI_API_KEY)
+
+
+def transcribe_audio(audio_source: str, is_url: bool = False) -> str:
+    """
+    Transcreve áudio para texto usando o OpenAI.
+    """
+    if is_url:
+        try:
+            response = requests.get(
+              audio_source,
+              stream=True,
+              auth=(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN),
+            )
+
+            response.raise_for_status()
+
+            audio_bytes = response.content
+        except requests.exceptions.RequestException as e:
+            raise ValueError(f"Failed to request audio URL: {e}")
+    else:
+        try:
+            with open(audio_source, "rb") as f:
+                audio_bytes = f.read()
+        except FileNotFoundError:
+            raise ValueError(f"Audio file not found: {audio_source}")
+
+    transcription = llm.audio.transcriptions.create(
+        model=TRANSCRIBE_MODEL,
+        file=audio_bytes,
+        response_format="text"
+    )
+
+    return transcription.text.strip()
+
+
+def generate_response(transcribed_text: str, user_context: str = None) -> str:
+    """
+    Gera uma resposta baseada no texto transcrito.
+    """
+    prompt = f"Mensagem do cliente: {transcribed_text}\n"
+
+    if user_context:
+        prompt += f"Contexto do cliente: {user_context}\n"
+    prompt += "\nResponda de forma clara e objetiva como um atendente de suporte."
+
+    response = llm.chat.completions.create(
+        model=NLP_MODEL,
+        messages=[
+            {"role": "system", "content": "Você é um atendente de suporte ao cliente."},
+            {"role": "user", "content": prompt},
+        ],
+        temperature=0.5,
+    )
+
+    return response.choices[0].message.content.strip()

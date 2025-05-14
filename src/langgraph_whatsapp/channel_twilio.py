@@ -7,6 +7,7 @@ from twilio.twiml.messaging_response import MessagingResponse
 
 from src.langgraph_whatsapp.agent import Agent
 from src.langgraph_whatsapp.config import TWILIO_AUTH_TOKEN, TWILIO_ACCOUNT_SID
+from src.openai.openai import transcribe_audio
 
 LOGGER = logging.getLogger("whatsapp")
 
@@ -33,9 +34,11 @@ def twilio_url_to_data_uri(url: str, content_type: str = None) -> str:
 
     return data_uri
 
+
 class WhatsAppAgent(ABC):
     @abstractmethod
     async def handle_message(self, request: Request) -> str: ...
+
 
 class WhatsAppAgentTwilio(WhatsAppAgent):
     def __init__(self) -> None:
@@ -63,6 +66,7 @@ class WhatsAppAgentTwilio(WhatsAppAgent):
             ctype = form.get(f"MediaContentType{i}", "")
             url   = form.get(f"MediaUrl{i}", "")
 
+            # IMAGE
             if url and ctype.startswith("image/"):
                 try:
                     LOGGER.info(f"\nDownloading image #{i}")
@@ -74,7 +78,21 @@ class WhatsAppAgentTwilio(WhatsAppAgent):
                         "data_uri": twilio_url_to_data_uri(url, ctype),
                     })
                 except Exception as err:
-                    LOGGER.error("Failed to download %s: %s", url, err)
+                    LOGGER.error("Failed to download image %s: %s", url, err)
+
+            # AUDIO
+            elif url and ctype.startswith("audio/"):
+                try:
+                    LOGGER.info(f"\nDownloading audio #{i}")
+                    LOGGER.info(f'Url: "{url}"')
+                    LOGGER.info(f'Content type: "{ctype}"')
+
+                    # transcribe audio
+                    transcription = transcribe_audio(url, is_url=True)
+
+                    LOGGER.info(f"\nTranscription:\n{transcription}")
+                except Exception as err:
+                    LOGGER.error("Failed to download audio %s: %s", url, err)
 
         # TODO: Uncomment when LangGraph server is ready
         # # Assemble payload for the LangGraph agent
