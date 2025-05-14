@@ -1,5 +1,5 @@
-import requests
-from openai import OpenAI
+import requests, time
+from openai import OpenAI, RateLimitError
 
 from langgraph_whatsapp.config import OPENAI_API_KEY, TRANSCRIBE_MODEL, NLP_MODEL, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN
 import logging
@@ -43,7 +43,7 @@ def transcribe_audio(audio_source: str, is_url: bool = False, retries: int = 3) 
 
             return transcription.text.strip()
 
-        except openai.RateLimitError:
+        except RateLimitError:
             wait = 2 ** i
             LOGGER.warning(f"Rate limit exceeded. Retrying in {wait} seconds...")
             time.sleep(wait)
