@@ -46,11 +46,11 @@ sudo nano /etc/systemd/system/gunicorn.service
 
 ## Logs
 ```bash
-# para ver os logs
-sudo journalctl -u gunicorn
+# para ver os logs de erro do gunicorn em tempo real
+sudo tail -f /var/log/gunicorn/error.log
 
-# para ver os logs em tempo real
-sudo journalctl -u gunicorn -f
+# para ver os logs da aplicação em tempo real
+sudo tail -f /var/log/gunicorn/app.log
 ```
 
 ## About the project
