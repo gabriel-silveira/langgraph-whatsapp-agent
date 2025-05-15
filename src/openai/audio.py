@@ -43,7 +43,8 @@ def transcribe_audio(audio_source: str, is_url: bool = False, retries: int = 3) 
                     file=audio_file,
                     response_format="text"
                 )
-                return transcription.text.strip()
+                # Quando response_format="text", a API retorna diretamente uma string
+                return transcription.strip()
 
             except RateLimitError as e:
                 if "insufficient_quota" in str(e):
