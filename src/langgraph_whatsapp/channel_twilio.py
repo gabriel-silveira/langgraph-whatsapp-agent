@@ -7,7 +7,7 @@ from twilio.twiml.messaging_response import MessagingResponse
 
 from src.langgraph_whatsapp.agent import Agent
 from src.langgraph_whatsapp.config import TWILIO_AUTH_TOKEN, TWILIO_ACCOUNT_SID
-from src.openai.openai import transcribe_audio
+from src.openai.audio import transcribe_audio
 
 LOGGER = logging.getLogger("whatsapp")
 
