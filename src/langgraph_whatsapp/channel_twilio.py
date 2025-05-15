@@ -88,9 +88,9 @@ class WhatsAppAgentTwilio(WhatsAppAgent):
                     LOGGER.info(f'Content type: "{ctype}"')
 
                     # transcribe audio
-                    transcription = transcribe_audio(url, is_url=True)
+                    content = transcribe_audio(url, is_url=True)
 
-                    LOGGER.info(f"\nTranscription:\n{transcription}")
+                    LOGGER.info(f"\nTranscription:\n{content}")
                 except Exception as err:
                     LOGGER.error("Failed to download audio %s: %s", url, err)
 
@@ -109,7 +109,7 @@ class WhatsAppAgentTwilio(WhatsAppAgent):
         # reply = await self.agent.invoke(**input_data)
 
         # Temporary response without LangGraph
-        reply = f"Received your message: {content}\nLangGraph integration coming soon!"
+        reply = f"Received your message:\n{content}\nLangGraph integration coming soon!"
 
         LOGGER.info(f"\nReplying to {sender}")
         LOGGER.info(f'Body: "{reply}"')
