@@ -109,7 +109,7 @@ class WhatsAppAgentTwilio(WhatsAppAgent):
         # reply = await self.agent.invoke(**input_data)
 
         # Temporary response without LangGraph
-        reply = f"Received your message:\n{content}\nLangGraph integration coming soon!"
+        reply = f"Received your message:\n{content}"
 
         LOGGER.info(f"\nReplying to {sender}")
         LOGGER.info(f'Body: "{reply}"')
