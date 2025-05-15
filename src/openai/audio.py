@@ -1,5 +1,5 @@
 import requests, time, logging
-from openai import OpenAI, RateLimitError
+from openai import OpenAI, RateLimitError, APIError, APIConnectionError
 from langgraph_whatsapp.config import OPENAI_API_KEY, TRANSCRIBE_MODEL, NLP_MODEL, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN
 
 LOGGER = logging.getLogger("whatsapp")
@@ -45,12 +45,24 @@ def transcribe_audio(audio_source: str, is_url: bool = False, retries: int = 3) 
                 )
                 return transcription.text.strip()
 
-            except RateLimitError:
+            except RateLimitError as e:
+                if "insufficient_quota" in str(e):
+                    LOGGER.error("OpenAI API quota exceeded. Please check your billing status.")
+                    raise Exception("OpenAI API quota exceeded. Please check your billing status.") from e
+                
                 if i < retries - 1:  # Não espera na última tentativa
                     wait = 2 ** i
                     LOGGER.warning(f"Rate limit exceeded. Retrying in {wait} seconds...")
                     time.sleep(wait)
                     audio_file.seek(0)  # Reset do ponteiro do arquivo para nova tentativa
+                else:
+                    raise
+            except (APIError, APIConnectionError) as e:
+                if i < retries - 1:
+                    wait = 2 ** i
+                    LOGGER.warning(f"API error: {str(e)}. Retrying in {wait} seconds...")
+                    time.sleep(wait)
+                    audio_file.seek(0)
                 else:
                     raise
 
