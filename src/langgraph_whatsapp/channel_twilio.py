@@ -1,5 +1,5 @@
 # channel.py
-import base64, logging, requests
+import base64, logging, requests, uuid
 from abc import ABC, abstractmethod
 
 from fastapi import Request, HTTPException
@@ -8,6 +8,7 @@ from twilio.twiml.messaging_response import MessagingResponse
 from src.langgraph_whatsapp.agent import Agent
 from src.langgraph_whatsapp.config import TWILIO_AUTH_TOKEN, TWILIO_ACCOUNT_SID
 from src.openai.audio import transcribe_audio
+from src.chatbot.stream import answer
 
 LOGGER = logging.getLogger("whatsapp")
 
@@ -53,6 +54,8 @@ class WhatsAppAgentTwilio(WhatsAppAgent):
 
         sender  = form.get("From", "").strip()
         content = form.get("Body", "").strip()
+
+        thread_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, sender))
 
         if not sender:
             raise HTTPException(400, detail="Missing 'From' in request form")
@@ -109,7 +112,11 @@ class WhatsAppAgentTwilio(WhatsAppAgent):
         # reply = await self.agent.invoke(**input_data)
 
         # Temporary response without LangGraph
-        reply = f"Received your message:\n{content}"
+        # reply = f"Received your message:\n{content}"
+        reply = answer(content, thread_id)
+
+        if not reply:
+            raise HTTPException(500, "Failed to generate response")
 
         LOGGER.info(f"\nReplying to {sender}")
         LOGGER.info(f'Body: "{reply}"')
