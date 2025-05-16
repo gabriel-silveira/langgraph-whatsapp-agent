@@ -93,7 +93,7 @@ class WhatsAppAgentTwilio(WhatsAppAgent):
                     # transcribe audio
                     content = transcribe_audio(url, is_url=True)
 
-                    LOGGER.info(f"\nTranscription:\n{content}")
+                    LOGGER.info(f"Audio transcription:\n{content}")
                 except Exception as err:
                     LOGGER.error("Failed to download audio %s: %s", url, err)
 
@@ -113,13 +113,15 @@ class WhatsAppAgentTwilio(WhatsAppAgent):
 
         # Temporary response without LangGraph
         # reply = f"Received your message:\n{content}"
+        print(f"\nThread ID: {thread_id}")
+
         reply = answer(content, thread_id)
 
         if not reply:
             raise HTTPException(500, "Failed to generate response")
 
-        LOGGER.info(f"\nReplying to {sender}")
-        LOGGER.info(f'Body: "{reply}"')
+        LOGGER.info(f"Replying to {sender}")
+        LOGGER.info(f'Body:\n"{reply}"')
 
         twiml = MessagingResponse()
         twiml.message(reply)
