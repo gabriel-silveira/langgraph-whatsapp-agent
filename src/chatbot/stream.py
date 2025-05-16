@@ -43,8 +43,11 @@ def answer(user_input: str, thread_id: str):
         config={"configurable": {"thread_id": thread_id}},
         stream_mode="values",
     ):
+        print(event)
         if "messages" in event:
             # event["messages"][-1].pretty_print()
+            print(f"\nEvento:{event['messages']}")
+
             return event["messages"][-1].content
 
 
