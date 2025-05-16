@@ -113,7 +113,7 @@ class WhatsAppAgentTwilio(WhatsAppAgent):
 
         # Temporary response without LangGraph
         # reply = f"Received your message:\n{content}"
-        print(f"\nThread ID: {thread_id}")
+        LOGGER.info(f"\nThread ID: {thread_id}")
 
         reply = answer(content, thread_id)
 

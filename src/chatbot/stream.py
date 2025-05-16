@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated
 from typing_extensions import TypedDict
 
@@ -5,6 +6,8 @@ from langgraph.graph import StateGraph, START
 from langgraph.graph.message import add_messages
 from langchain.chat_models import init_chat_model
 from langgraph.checkpoint.memory import MemorySaver
+
+LOGGER = logging.getLogger("whatsapp")
 
 
 class State(TypedDict):
@@ -43,10 +46,11 @@ def answer(user_input: str, thread_id: str):
         config={"configurable": {"thread_id": thread_id}},
         stream_mode="values",
     ):
-        print(event)
+        LOGGER.info(f"Event:\n{event}")
+
         if "messages" in event:
             # event["messages"][-1].pretty_print()
-            print(f"\nEvento:{event['messages']}")
+            LOGGER.info(f"Event messages:\n{event['messages']}")
 
             return event["messages"][-1].content
 
