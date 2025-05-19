@@ -41,18 +41,16 @@ graph = graph_builder.compile(checkpointer=memory)
 
 
 def answer(user_input: str, thread_id: str):
-    for event in graph.stream(
+    result = graph.invoke(
         {"messages": [{"role": "user", "content": user_input}]},
-        config={"configurable": {"thread_id": thread_id}},
-        stream_mode="values",
-    ):
-        LOGGER.info(f"Event:\n{event}")
+        config={"configurable": {"thread_id": thread_id}}
+    )
 
-        if "messages" in event:
-            # event["messages"][-1].pretty_print()
-            LOGGER.info(f"Event messages:\n{event['messages']}")
+    # Obtém a última mensagem do resultado
+    last_message = result["messages"][-1]
 
-            return event["messages"][-1].content
+    # Retorna o conteúdo da mensagem
+    return last_message.content
 
 
 # thread_id = "987654321"
@@ -66,14 +64,17 @@ def answer(user_input: str, thread_id: str):
 #                 print("Goodbye!")
 #                 break
 #
-#             answer(user_input, thread_id)
+#             response = answer(user_input, thread_id)
+#
+#             print(f"\nAssistant: {response}")
 #         except:
 #             # fallback if input() is not available
 #             user_input = "What do you know about LangGraph?"
 #
 #             print(f"\nUser: {user_input}")
 #
-#             answer(user_input, thread_id)
+#             response = answer(user_input, thread_id)
+#
+#             print(f"\nAssistant: {response}")
 #
 #             break
-    
