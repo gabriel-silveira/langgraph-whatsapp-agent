@@ -7,6 +7,8 @@ from langgraph.graph.message import add_messages
 from langchain.chat_models import init_chat_model
 from langgraph.checkpoint.memory import MemorySaver
 
+from src.prompts.smart_risk.prompt import SYSTEM_PROMPT
+
 LOGGER = logging.getLogger("whatsapp")
 
 
@@ -41,8 +43,27 @@ graph = graph_builder.compile(checkpointer=memory)
 
 
 def answer(user_input: str, thread_id: str):
+    # Configuração para o LangGraph com o thread_id
+    config = {"configurable": {"thread_id": thread_id}}
+    
+    # Tenta recuperar o histórico da conversa
+    try:
+        history = memory.get(config)
+        if history:
+            messages = history["messages"]
+            # Adiciona a nova mensagem do usuário ao histórico
+            messages.append({"role": "user", "content": user_input})
+        else:
+            raise KeyError
+    except (KeyError, AttributeError):
+        # Se não houver histórico, inicia uma nova conversa com o system prompt
+        messages = [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": user_input}
+        ]
+    
     result = graph.invoke(
-        {"messages": [{"role": "user", "content": user_input}]},
+        {"messages": messages},
         config={"configurable": {"thread_id": thread_id}}
     )
 
