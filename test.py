@@ -1,7 +1,7 @@
 from src.chatbot.stream import answer
 
 
-thread_id = "987654321"
+thread_id = "ABCDEFGH"
 
 if __name__ == "__main__":
     while True:
