@@ -7,7 +7,7 @@ from langgraph.graph.message import add_messages
 from langchain.chat_models import init_chat_model
 from langgraph.checkpoint.memory import MemorySaver
 
-from src.prompts.arese.prompt import SYSTEM_PROMPT
+from src.prompts.smart_risk.prompt import SYSTEM_PROMPT
 
 LOGGER = logging.getLogger("whatsapp")
 
